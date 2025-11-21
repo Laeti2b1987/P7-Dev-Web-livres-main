@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
 
   const inputPath = req.file.path;
   const outputDir = path.join('images');
-  const optimizedFilename = 'optimized_' + req.file.filename;
+  const optimizedFilename = 'optimized_' + Date.now() + '.webp';
   const outputPath = path.join(outputDir, optimizedFilename);
 
   try {
@@ -16,16 +16,19 @@ module.exports = async (req, res, next) => {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    
-
-await sharp(inputPath)
-  .resize(
-    parseInt(process.env.IMAGE_WIDTH) || 463,
-    parseInt(process.env.IMAGE_HEIGHT) || 595,
-    { fit: 'cover', position: 'center' }
-  )
-  .jpeg({ quality: parseInt(process.env.IMAGE_QUALITY) || 80 })
-  .toFile(outputPath);
+  
+    const width = parseInt(process.env.IMAGE_WIDTH) || 463;
+    const height = parseInt(process.env.IMAGE_HEIGHT) || 595;
+    const quality = parseInt(process.env.IMAGE_QUALITY) || 40;
+  
+    await sharp(inputPath)
+      .resize(width, height, { fit: 'cover', position: 'center' })
+      .webp({
+        quality: quality,
+        lossless: false
+      })
+      .withMetadata(false)
+      .toFile(outputPath);
 
 
 
